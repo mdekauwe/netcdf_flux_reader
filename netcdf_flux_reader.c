@@ -12,21 +12,20 @@
 //
 // DATE:        16th November, 2016
 //
+// Notes:
+//              To get around static arrays
+// http://www.unidata.ucar.edu/support/help/MailArchives/netcdf/msg08338.html
 
 #include "netcdf_flux_reader.h"
 
 int main(int argc, char **argv) {
-    int   i;
+    int   i, jy, kx;
     long  offset;
     char  infname[STRING_LENGTH];
 
-    // Need to be declared like this otherwise the netcdf read will attempt to
-    // use the heap rather than the stack to allocate memory and run out.
-    // I'm sure there is a way to get netcdf to read into a 1D array but I
-    // don't know how to do that and can't find a quick example
-    // NB. I'm declaring 1 extra spot for leap years, so we will need to make
-    // sure when we read from this array we are checking leap years.
-    static float data_in[NT][NY][NX];
+    float *data_in = NULL;
+
+    int  status, nc_id, var_id;
 
     // allocate some memory
     control *c;
@@ -36,16 +35,27 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
+    if ((data_in = (float *)calloc(NT * NY * NX, sizeof(float))) == NULL) {
+        fprintf(stderr, "Error allocating space for data_in array\n");
+        exit(EXIT_FAILURE);
+    }
+
     // Initial values, these can be changed on the cmd line
     strcpy(c->fdir, "/Users/mdekauwe/src/c/netcdf_flux_reader");
     strcpy(c->var_name, "Tair");
 
     sprintf(infname, "%s/TumbaFluxnet.1.4_met.nc", c->fdir);
 
-    read_nc_file_into_array(c, infname, data_in);
+    read_nc_file_into_array(c, infname, &(*data_in));
 
+
+    jy = 0; //
+    kx = 0;
     for (i = 0; i < NT; i++) {
-        printf("%f\n", data_in[i][0][0]);
+
+        offset = ((i * NY + jy) * NX) + kx;
+        printf("%f\n", data_in[offset]);
+
     }
 
 
@@ -55,8 +65,7 @@ int main(int argc, char **argv) {
 
 }
 
-void read_nc_file_into_array(control *c, char *infname,
-                             float nc_in[NT][NY][NX]) {
+void read_nc_file_into_array(control *c, char *infname, float *nc_in) {
 
     int  status, nc_id, var_id;
 
@@ -68,8 +77,7 @@ void read_nc_file_into_array(control *c, char *infname,
         ERR(status);
     }
 
-    if ((status = nc_get_var_float(nc_id, var_id,
-                                   &nc_in[0][0][0]))) {
+    if ((status = nc_get_var_float(nc_id, var_id, nc_in))) {
         ERR(status);
     }
 

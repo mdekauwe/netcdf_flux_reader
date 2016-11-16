@@ -29,7 +29,7 @@ typedef struct  {
 } control;
 
 
-void read_nc_file_into_array(control *, char *, float nc_in[NT][NY][NX]);
+void read_nc_file_into_array(control *, char *, float *nc_in);
 
 
 #endif /* GET_LT_AUSSIE_TMAX_H */
