@@ -69,24 +69,34 @@ int main(int argc, char **argv) {
 
 }
 
-void query_nc_header(int nc_id, int *ntime, int *ny, int *nx) {
+void query_nc_dims(int nc_id, long *ntime, long *ny, long *nx) {
 
-    int  status;
+    int  status, time_id, y_id, x_id;
+    long length;
 
-    // Query dims
-    if ((status = nc_inq_dimid(nc_id, "time", ntime))) {
+    if ((status = nc_inq_dimid(nc_id, "time", &time_id))) {
         ERR(status);
     }
 
-    if ((status = nc_inq_dimid(nc_id, "y", ny))) {
+    if ((status = nc_inq_dimlen(nc_id, time_id, ntime))) {
         ERR(status);
     }
 
-    if ((status = nc_inq_dimid(nc_id, "x", nx))) {
+    if ((status = nc_inq_dimid(nc_id, "y", &y_id))) {
         ERR(status);
     }
 
+    if ((status = nc_inq_dimlen(nc_id, y_id, ny))) {
+        ERR(status);
+    }
 
+    if ((status = nc_inq_dimid(nc_id, "x", &x_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_inq_dimlen(nc_id, x_id, nx))) {
+        ERR(status);
+    }
 
     return;
 }
@@ -94,15 +104,15 @@ void query_nc_header(int nc_id, int *ntime, int *ny, int *nx) {
 
 void read_nc_file_into_array(control *c, char *infname, float *nc_in) {
 
-    int  status, nc_id, var_id, ny, nx, ntime;
-    int blah;
+    int  status, nc_id, var_id;
+    long ny, nx, ntime;
+
     // Open the netcdf file
     if ((status = nc_open(infname, NC_NOWRITE, &nc_id))) {
         ERR(status);
     }
-    
 
-    query_nc_header(nc_id, &ntime, &ny, &nx);
+    query_nc_dims(nc_id, &ntime, &ny, &nx);
     printf("%d %d %d\n", ntime, ny, nx);
     exit(1);
 

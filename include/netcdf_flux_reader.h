@@ -29,7 +29,7 @@ typedef struct  {
 } control;
 
 
-void query_nc_header(int, int *, int *, int *);
+void query_nc_dims(int, long *, long *, long *);
 void read_nc_file_into_array(control *, char *, float *nc_in);
 
 
