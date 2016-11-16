@@ -1,3 +1,7 @@
-# get_lt_aussie_tmax
+# C netcdf reader
 
-Using the eMAST Tmax data estimate the long-term N-days Tmax for each pixel across the continent. Where N might be 3, 4 or 5 days, not decided yet.
+Simple C code to read a netcdf file
+
+To do:
+- query the header
+- read the netcdf into dynamic array rather than a static declared one
