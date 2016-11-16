@@ -24,14 +24,13 @@
 #include "netcdf_flux_reader.h"
 
 int main(int argc, char **argv) {
-    int   i,
-    int   jy = 0, kx = 0; // I'm just setting these for completness
-    long  offset;
-    char  infname[STRING_LENGTH];
+    int    i, status, nc_id, var_id;
+    int    jy = 0, kx = 0; // I'm just setting these for completness
 
+    long   offset;
+    char   infname[STRING_LENGTH];
     float *data_in = NULL;
 
-    int  status, nc_id, var_id;
 
     // allocate some memory
     control *c;
@@ -40,6 +39,8 @@ int main(int argc, char **argv) {
         fprintf(stderr, "control structure: Not allocated enough memory!\n");
         exit(EXIT_FAILURE);
     }
+
+
 
     if ((data_in = (float *)calloc(NT * NY * NX, sizeof(float))) == NULL) {
         fprintf(stderr, "Error allocating space for data_in array\n");
@@ -68,13 +69,46 @@ int main(int argc, char **argv) {
 
 }
 
+void query_nc_header(int nc_id, int *ntime, int *ny, int *nx) {
+
+    int  status;
+
+    // Query dims
+    if ((status = nc_inq_dimid(nc_id, "time", ntime))) {
+        ERR(status);
+    }
+
+    if ((status = nc_inq_dimid(nc_id, "y", ny))) {
+        ERR(status);
+    }
+
+    if ((status = nc_inq_dimid(nc_id, "x", nx))) {
+        ERR(status);
+    }
+
+
+
+    return;
+}
+
+
 void read_nc_file_into_array(control *c, char *infname, float *nc_in) {
 
-    int  status, nc_id, var_id;
-
+    int  status, nc_id, var_id, ny, nx, ntime;
+    int blah;
+    // Open the netcdf file
     if ((status = nc_open(infname, NC_NOWRITE, &nc_id))) {
         ERR(status);
     }
+    
+
+    query_nc_header(nc_id, &ntime, &ny, &nx);
+    printf("%d %d %d\n", ntime, ny, nx);
+    exit(1);
+
+
+
+
 
     if ((status = nc_inq_varid(nc_id, c->var_name, &var_id))) {
         ERR(status);
