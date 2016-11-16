@@ -22,15 +22,45 @@
 
 typedef struct  {
     char   fdir[STRING_LENGTH];
-    char   var_name[STRING_LENGTH];
-    int    window;
-    int    start_yr;
-    int    end_yr;
+    int    sub_daily;
 } control;
+
+typedef struct {
+    double *year;
+    double *rain;
+    double *par;
+    double *tair;
+    double *tsoil;
+    double *co2;
+    double *ndep;
+    double *nfix;       /* N inputs from biological fixation (t/ha/timestep (d/30min)) */
+    double *wind;
+    double *press;
+
+    /* Day timestep */
+    double *prjday; /* should really be renamed to doy for consistancy */
+    double *tam;
+    double *tpm;
+    double *tmin;
+    double *tmax;
+    double *tday;
+    double *vpd_am;
+    double *vpd_pm;
+    double *wind_am;
+    double *wind_pm;
+    double *par_am;
+    double *par_pm;
+
+    /* sub-daily timestep */
+    double *vpd;
+    double *doy;
+    double *diffuse_frac;
+
+} met_arrays;
 
 
 void query_nc_dims(int, long *, long *, long *);
-void read_nc_file_into_array(control *, char *, float *nc_in);
+void read_met_data_from_netcdf_file(control *, met_arrays *ma, char *);
 
 
 #endif /* GET_LT_AUSSIE_TMAX_H */

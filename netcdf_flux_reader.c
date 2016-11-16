@@ -29,41 +29,43 @@ int main(int argc, char **argv) {
 
     long   offset;
     char   infname[STRING_LENGTH];
-    float *data_in = NULL;
 
+    control *c;
+    met_arrays *ma;
 
     // allocate some memory
-    control *c;
     c = (control *)malloc(sizeof (control));
     if (c == NULL) {
         fprintf(stderr, "control structure: Not allocated enough memory!\n");
         exit(EXIT_FAILURE);
     }
 
-
-
-    if ((data_in = (float *)calloc(NT * NY * NX, sizeof(float))) == NULL) {
-        fprintf(stderr, "Error allocating space for data_in array\n");
-        exit(EXIT_FAILURE);
+    ma = (met_arrays *)malloc(sizeof(met_arrays));
+    if (ma == NULL) {
+    	fprintf(stderr, "met arrays structure: Not allocated enough memory!\n");
+    	exit(EXIT_FAILURE);
     }
 
     // Initial values, these can be changed on the cmd line
     strcpy(c->fdir, "/Users/mdekauwe/src/c/netcdf_flux_reader");
-    strcpy(c->var_name, "Tair");
-
     sprintf(infname, "%s/TumbaFluxnet.1.4_met.nc", c->fdir);
+    c->sub_daily = TRUE;
 
-    read_nc_file_into_array(c, infname, &(*data_in));
+
+    read_met_data_from_netcdf_file(c, ma, infname);
+
 
     for (i = 0; i < NT; i++) {
 
         offset = ((i * NY + jy) * NX) + kx;
-        printf("%f\n", data_in[offset]);
+        printf("%f\n", i, ma->tair[offset]);
 
     }
 
 
     free(c);
+
+    free(ma);
 
     return(EXIT_SUCCESS);
 
@@ -102,9 +104,9 @@ void query_nc_dims(int nc_id, long *ntime, long *ny, long *nx) {
 }
 
 
-void read_nc_file_into_array(control *c, char *infname, float *nc_in) {
+void read_met_data_from_netcdf_file(control *c, met_arrays *ma, char *infname) {
 
-    int  status, nc_id, var_id;
+    int  status, nc_id, tair_id;
     long ny, nx, ntime;
 
     // Open the netcdf file
@@ -113,18 +115,18 @@ void read_nc_file_into_array(control *c, char *infname, float *nc_in) {
     }
 
     query_nc_dims(nc_id, &ntime, &ny, &nx);
-    printf("%d %d %d\n", ntime, ny, nx);
-    exit(1);
 
+    // Allocate met arrays
+    if ((ma->tair = (double *)calloc(ntime, sizeof(double))) == NULL) {
+        fprintf(stderr,"Error allocating space for tair array\n");
+		exit(EXIT_FAILURE);
+    }
 
-
-
-
-    if ((status = nc_inq_varid(nc_id, c->var_name, &var_id))) {
+    if ((status = nc_inq_varid(nc_id, "Tair", &tair_id))) {
         ERR(status);
     }
 
-    if ((status = nc_get_var_float(nc_id, var_id, nc_in))) {
+    if ((status = nc_get_var_double(nc_id, tair_id, &(*ma->tair)))) {
         ERR(status);
     }
 
