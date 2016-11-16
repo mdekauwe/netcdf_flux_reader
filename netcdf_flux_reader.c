@@ -116,12 +116,69 @@ void read_met_data_from_netcdf_file(control *c, met_arrays *ma, char *infname) {
 
     query_nc_dims(nc_id, &ntime, &ny, &nx);
 
-    // Allocate met arrays
+    // allocate memory for meteorological arrays 
+    if ((ma->year = (double *)calloc(ntime, sizeof(double))) == NULL) {
+        fprintf(stderr,"Error allocating space for year array\n");
+		exit(EXIT_FAILURE);
+    }
+
+    if ((ma->doy = (double *)calloc(ntime, sizeof(double))) == NULL) {
+        fprintf(stderr,"Error allocating space for doy array\n");
+		exit(EXIT_FAILURE);
+    }
+
+    if ((ma->rain = (double *)calloc(ntime, sizeof(double))) == NULL) {
+        fprintf(stderr,"Error allocating space for rain array\n");
+		exit(EXIT_FAILURE);
+    }
+
+    if ((ma->par = (double *)calloc(ntime, sizeof(double))) == NULL) {
+        fprintf(stderr,"Error allocating space for par array\n");
+		exit(EXIT_FAILURE);
+    }
+
     if ((ma->tair = (double *)calloc(ntime, sizeof(double))) == NULL) {
         fprintf(stderr,"Error allocating space for tair array\n");
 		exit(EXIT_FAILURE);
     }
 
+    if ((ma->tsoil = (double *)calloc(ntime, sizeof(double))) == NULL) {
+        fprintf(stderr,"Error allocating space for tsoil array\n");
+		exit(EXIT_FAILURE);
+    }
+
+    if ((ma->vpd = (double *)calloc(ntime, sizeof(double))) == NULL) {
+        fprintf(stderr,"Error allocating space for vpd array\n");
+		exit(EXIT_FAILURE);
+    }
+
+    if ((ma->co2 = (double *)calloc(ntime, sizeof(double))) == NULL) {
+        fprintf(stderr,"Error allocating space for co2 array\n");
+		exit(EXIT_FAILURE);
+    }
+
+    if ((ma->ndep = (double *)calloc(ntime, sizeof(double))) == NULL) {
+        fprintf(stderr,"Error allocating space for ndep array\n");
+		exit(EXIT_FAILURE);
+    }
+
+    if ((ma->nfix = (double *)calloc(ntime, sizeof(double))) == NULL) {
+        fprintf(stderr,"Error allocating space for nfix array\n");
+		exit(EXIT_FAILURE);
+    }
+
+    if ((ma->wind = (double *)calloc(ntime, sizeof(double))) == NULL) {
+        fprintf(stderr,"Error allocating space for wind array\n");
+		exit(EXIT_FAILURE);
+    }
+
+    if ((ma->press = (double *)calloc(ntime, sizeof(double))) == NULL) {
+        fprintf(stderr,"Error allocating space for press array\n");
+		exit(EXIT_FAILURE);
+    }
+
+
+    // Read netcdf vars into gday met arrays
     if ((status = nc_inq_varid(nc_id, "Tair", &tair_id))) {
         ERR(status);
     }
