@@ -13,13 +13,19 @@
 // DATE:        16th November, 2016
 //
 // Notes:
-//              To get around static arrays
+//              To get around netcdf interface we need to use a single
+//              contiguous block of memory
+//              So a 3D array float array[A][B][C] would then need some offset
+//              logic to access it from a single block, e.g.
+//              offset = ((i * B + j) * C + k), where i,j,k refer to A,B,C
+//              see, but note my ny and nx dims are reversed for the PALS exp
 // http://www.unidata.ucar.edu/support/help/MailArchives/netcdf/msg08338.html
 
 #include "netcdf_flux_reader.h"
 
 int main(int argc, char **argv) {
-    int   i, jy, kx;
+    int   i,
+    int   jy = 0, kx = 0; // I'm just setting these for completness
     long  offset;
     char  infname[STRING_LENGTH];
 
@@ -48,9 +54,6 @@ int main(int argc, char **argv) {
 
     read_nc_file_into_array(c, infname, &(*data_in));
 
-
-    jy = 0; //
-    kx = 0;
     for (i = 0; i < NT; i++) {
 
         offset = ((i * NY + jy) * NX) + kx;
