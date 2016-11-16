@@ -1,0 +1,5 @@
+netcdf_flux_reader
+*.o
+*.nc
+netcdf_flux_reader.c.dSYM
+netcdf_flux_reader.c.dSYM/*
